@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ painting.title }} - Artist Portfolio{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('paintings') }}">Paintings</a></li>
+            <li class="breadcrumb-item active">{{ painting.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            {% if painting.image_url %}
+            <img src="{{ painting.image_url }}" alt="{{ painting.title }}" class="img-fluid rounded">
+            {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 500px;">
+                <i class="fas fa-image fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-5">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h1 class="h3 fw-bold">{{ painting.title }}</h1>
+                    <p class="text-muted mb-0">{{ painting.category }}</p>
+                </div>
+                {% if painting.featured %}
+                <span class="badge bg-warning text-dark">Featured</span>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <h3 class="fw-bold">${{ "%.2f"|format(painting.price) }}</h3>
+            </div>
+
+            {% if painting.description %}
+            <div class="mb-4">
+                <h6 class="fw-bold">Description</h6>
+                <p>{{ painting.description }}</p>
+            </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <h6 class="fw-bold">Details</h6>
+                <ul class="list-unstyled">
+                    {% if painting.size %}
+                    <li class="mb-1"><strong>Size:</strong> {{ painting.size }}</li>
+                    {% endif %}
+                    {% if painting.medium %}
+                    <li class="mb-1"><strong>Medium:</strong> {{ painting.medium }}</li>
+                    {% endif %}
+                    {% if painting.year %}
+                    <li class="mb-1"><strong>Year:</strong> {{ painting.year }}</li>
+                    {% endif %}
+                    <li class="mb-1"><strong>Status:</strong>
+                        {% if painting.available %}
+                        <span class="text-success">Available</span>
+                        {% else %}
+                        <span class="text-danger">Sold</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+
+            <div class="d-grid gap-2">
+                {% if painting.available %}
+                <button
+                    onclick="addToCart({{ painting.id }}, '{{ painting.title|replace("'", "\\'") }}', {{ painting.price }}, '{{ painting.image_url|replace("'", "\\'") if painting.image_url else '' }}')"
+                    class="btn btn-primary">
+                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                </button>
+                <button class="btn btn-outline-dark"
+                    onclick="toggleWishlist({{ painting.id }}, '{{ painting.title|replace("'", "\\'") }}')">
+                    <i class="far fa-heart me-2"></i>Add to Wishlist
+                </button>
+                {% else %}
+                <button class="btn btn-secondary" disabled>Sold Out</button>
+                {% endif %}
+                <a href="{{ url_for('contact') }}" class="btn btn-outline-dark">Inquire</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+/* Custom cursor effect */
+.custom-cursor {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #1a1a1a;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.2s ease;
+    mix-blend-mode: difference;
+}
+
+.custom-cursor.active {
+    transform: scale(1.5);
+    background: rgba(26, 26, 26, 0.2);
+}
+
+/* Painting card subtle hover */
+.painting-card {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Staggered animation */
+.stagger-animation {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Color palette display */
+.color-palette {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Smooth reveal on scroll */
+.reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Interactive background */
+.interactive-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.bg-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(26, 26, 26, 0.1);
+    border-radius: 50%;
+    animation: particle-float 15s infinite ease-in-out;
+}
+
+@keyframes particle-float {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(100px, -100px);
+    }
+    50% {
+        transform: translate(-50px, -150px);
+    }
+    75% {
+        transform: translate(-100px, -50px);
+    }
+}

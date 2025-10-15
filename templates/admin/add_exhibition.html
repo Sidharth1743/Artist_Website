@@ -1,0 +1,117 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add Exhibition - Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_exhibitions') }}">Exhibitions</a></li>
+            <li class="breadcrumb-item active">Add New</li>
+        </ol>
+    </nav>
+    <h1 class="h3 fw-bold">Add New Exhibition</h1>
+    <p class="text-muted">Showcase your gallery shows and past exhibitions</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.title.label(class="form-label fw-bold") }}
+                        {{ form.title(class="form-control form-control-lg", placeholder="e.g., Contemporary Visions 2024") }}
+                        {% for error in form.title.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.venue.label(class="form-label fw-bold") }}
+                            {{ form.venue(class="form-control", placeholder="e.g., Modern Art Gallery") }}
+                            {% for error in form.venue.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.date.label(class="form-label fw-bold") }}
+                            {{ form.date(class="form-control", placeholder="e.g., March 2024") }}
+                            {% for error in form.date.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control", rows="5", placeholder="Describe the exhibition, featured works, and significance...") }}
+                        {% for error in form.description.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        {{ form.image.label(class="form-label fw-bold") }}
+                        {{ form.image(class="form-control") }}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Accepted formats: JPG, PNG, JPEG. Max size: 16MB
+                        </div>
+                        {% for error in form.image.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Exhibition
+                        </button>
+                        <a href="{{ url_for('admin_exhibitions') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-lightbulb me-2"></i>Tips
+                </h5>
+                <ul class="small mb-0">
+                    <li class="mb-2">Use high-quality exhibition photos</li>
+                    <li class="mb-2">Include venue and date information</li>
+                    <li class="mb-2">Describe the theme and featured works</li>
+                    <li class="mb-2">Mention any awards or recognition</li>
+                    <li class="mb-2">Add context about the exhibition's significance</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">
+                    <i class="fas fa-museum me-2"></i>Exhibition Types
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-info">Solo Show</span>
+                    <span class="badge bg-info">Group Exhibition</span>
+                    <span class="badge bg-info">Gallery Show</span>
+                    <span class="badge bg-info">Museum Display</span>
+                    <span class="badge bg-info">Art Fair</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

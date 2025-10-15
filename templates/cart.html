@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - Artist Portfolio{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <h1 class="h2 fw-bold">Shopping Cart</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div id="cartItems" class="mb-4">
+                <!-- Cart items will be loaded here -->
+            </div>
+            
+            <div id="emptyCart" class="card text-center py-5" style="display: none;">
+                <div class="card-body">
+                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <h4>Your cart is empty</h4>
+                    <p class="text-muted">Add some paintings to get started</p>
+                    <a href="{{ url_for('paintings') }}" class="btn btn-primary mt-3">Browse Paintings</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Order Summary</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span class="text-success">Free</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total</strong>
+                        <strong id="total">$0.00</strong>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('checkout') }}" id="checkoutBtn" class="btn btn-primary">
+                            Proceed to Checkout
+                        </a>
+                        <a href="{{ url_for('paintings') }}" class="btn btn-outline-dark">
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Use the global cart variable from base.html
+
+function loadCart() {
+    const cartItemsContainer = document.getElementById('cartItems');
+    const emptyCart = document.getElementById('emptyCart');
+    
+    if (cart.length === 0) {
+        cartItemsContainer.style.display = 'none';
+        emptyCart.style.display = 'block';
+        document.getElementById('checkoutBtn').disabled = true;
+        return;
+    }
+    
+    cartItemsContainer.style.display = 'block';
+    emptyCart.style.display = 'none';
+    
+    let html = '';
+    cart.forEach((item, index) => {
+        html += `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <img src="${item.imageUrl || '/static/placeholder.jpg'}" 
+                                 class="img-fluid rounded" alt="${item.title}">
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold mb-1">${item.title}</h6>
+                            <p class="text-muted small mb-0">Original Artwork</p>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-group-sm">
+                                <button class="btn btn-outline-secondary" onclick="updateQuantity(${index}, -1)" title="Decrease">-</button>
+                                <input type="number" class="form-control text-center" value="${item.quantity}" 
+                                       min="1" max="99" 
+                                       onchange="setQuantity(${index}, this.value)"
+                                       style="width: 60px;">
+                                <button class="btn btn-outline-secondary" onclick="updateQuantity(${index}, 1)" title="Increase">+</button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <strong>$${(item.price * item.quantity).toFixed(2)}</strong>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    cartItemsContainer.innerHTML = html;
+    updateTotals();
+}
+
+async function updateQuantity(index, change) {
+    cart[index].quantity += change;
+    if (cart[index].quantity < 1) {
+        cart[index].quantity = 1;
+    }
+    if (cart[index].quantity > 99) {
+        cart[index].quantity = 99;
+    }
+    
+    // Update database
+    await fetch('/api/cart/update', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            painting_id: cart[index].id,
+            quantity: cart[index].quantity
+        })
+    });
+    
+    localStorage.setItem('cart', JSON.stringify(cart));
+    loadCart();
+}
+
+async function setQuantity(index, value) {
+    const quantity = parseInt(value) || 1;
+    
+    if (quantity < 1) {
+        cart[index].quantity = 1;
+    } else if (quantity > 99) {
+        cart[index].quantity = 99;
+    } else {
+        cart[index].quantity = quantity;
+    }
+    
+    // Update database
+    await fetch('/api/cart/update', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            painting_id: cart[index].id,
+            quantity: cart[index].quantity
+        })
+    });
+    
+    localStorage.setItem('cart', JSON.stringify(cart));
+    loadCart();
+}
+
+async function removeItem(index) {
+    if (confirm('Remove this item from cart?')) {
+        const paintingId = cart[index].id;
+        
+        // Remove from database
+        await fetch('/api/cart?painting_id=' + paintingId, {
+            method: 'DELETE'
+        });
+        
+        cart.splice(index, 1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        loadCart();
+        updateCartCount();
+    }
+}
+
+function updateTotals() {
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById('total').textContent = `$${subtotal.toFixed(2)}`;
+}
+
+function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById('cart-count').textContent = count;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadCart();
+    updateCartCount();
+});
+</script>
+{% endblock %}

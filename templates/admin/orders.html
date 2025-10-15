@@ -1,0 +1,169 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Orders - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-start">
+    <div>
+        <h1>Orders</h1>
+        <p>Track customer purchases</p>
+    </div>
+    <span class="badge bg-dark">{{ orders|length }} Total</span>
+</div>
+
+{% if orders %}
+<div class="section-card">
+    <div class="section-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Contact</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <strong class="text-primary">#{{ order.order_number[:10] }}</strong>
+                        </td>
+                        <td>
+                            <strong>{{ order.customer_name }}</strong>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                <i class="fas fa-envelope me-1"></i>{{ order.customer_email }}<br>
+                                {% if order.customer_phone %}
+                                <i class="fas fa-phone me-1"></i>{{ order.customer_phone }}
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ order.order_items|length }} item(s)</span>
+                        </td>
+                        <td>
+                            <strong class="text-success">${{ "%.2f"|format(order.total_amount) }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if order.status == 'delivered' else 'info' if order.status == 'shipped' else 'warning' if order.status == 'confirmed' else 'danger' if order.status == 'cancelled' else 'secondary' }}">
+                                {{ order.status.title() }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#orderModal{{ order.id }}">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!-- Order Detail Modals -->
+{% for order in orders %}
+<div class="modal fade" id="orderModal{{ order.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Order #{{ order.order_number }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Customer Information</h6>
+                        <p class="mb-1"><strong>Name:</strong> {{ order.customer_name }}</p>
+                        <p class="mb-1"><strong>Email:</strong> {{ order.customer_email }}</p>
+                        {% if order.customer_phone %}
+                        <p class="mb-1"><strong>Phone:</strong> {{ order.customer_phone }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Order Details</h6>
+                        <p class="mb-1"><strong>Date:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <p class="mb-1"><strong>Status:</strong> 
+                            <span class="badge bg-{{ 'success' if order.status == 'delivered' else 'info' if order.status == 'shipped' else 'warning' }}">
+                                {{ order.status.title() }}
+                            </span>
+                        </p>
+                        <p class="mb-1"><strong>Total:</strong> <span class="text-success">${{ "%.2f"|format(order.total_amount) }}</span></p>
+                    </div>
+                </div>
+                
+                {% if order.shipping_address %}
+                <div class="mb-3">
+                    <h6 class="fw-bold">Shipping Address</h6>
+                    <p class="mb-0">{{ order.shipping_address }}</p>
+                </div>
+                {% endif %}
+                
+                <h6 class="fw-bold">Order Items</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Painting</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.order_items %}
+                            <tr>
+                                <td>{{ item.painting.title if item.painting else 'N/A' }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ "%.2f"|format(item.price) }}</td>
+                                <td>${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td><strong class="text-success">${{ "%.2f"|format(order.total_amount) }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% else %}
+<div class="section-card">
+    <div class="section-body text-center py-5">
+        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+        <h4>No Orders Yet</h4>
+        <p class="text-muted">Customer orders will appear here once they start purchasing your artwork.</p>
+    </div>
+</div>
+{% endif %}
+
+<div class="alert alert-info mt-4">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Note:</strong> Order management is currently view-only. 
+    Status updates and order processing features will be added in a future update.
+</div>
+{% endblock %}

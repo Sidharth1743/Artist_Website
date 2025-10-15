@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - Artist Portfolio{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <h1 class="h2 fw-bold">Checkout</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Shipping Information</h5>
+                    
+                    <form id="checkoutForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Shipping Address *</label>
+                            <textarea class="form-control" id="address" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">City *</label>
+                                <input type="text" class="form-control" id="city" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">State *</label>
+                                <input type="text" class="form-control" id="state" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">ZIP *</label>
+                                <input type="text" class="form-control" id="zip" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Country *</label>
+                            <input type="text" class="form-control" id="country" value="United States" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Order Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Payment Method</h5>
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Payment processing will be set up soon. For now, orders will be marked as pending.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Order Summary</h5>
+                    <div id="orderItems"></div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span class="text-success">Free</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total</strong>
+                        <strong id="total">$0.00</strong>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary w-100" onclick="placeOrder()">
+                        Place Order
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-2">Secure Checkout</h6>
+                    <p class="small text-muted mb-0">
+                        <i class="fas fa-lock me-1"></i> Your information is secure<br>
+                        <i class="fas fa-truck me-1"></i> Free worldwide shipping<br>
+                        <i class="fas fa-undo me-1"></i> 30-day return policy
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-5">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h4 class="fw-bold mb-3">Order Placed Successfully!</h4>
+                <p class="text-muted mb-3">Your order number is: <strong id="orderNumber"></strong></p>
+                <p class="small text-muted">We'll send you a confirmation email shortly.</p>
+                <a href="{{ url_for('home') }}" class="btn btn-primary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Use the global cart variable from base.html
+
+function loadOrderSummary() {
+    const orderItemsContainer = document.getElementById('orderItems');
+    
+    if (cart.length === 0) {
+        window.location.href = '{{ url_for("cart") }}';
+        return;
+    }
+    
+    let html = '';
+    cart.forEach(item => {
+        html += `
+            <div class="d-flex justify-content-between mb-2">
+                <div>
+                    <div class="fw-bold">${item.title}</div>
+                    <small class="text-muted">Qty: ${item.quantity}</small>
+                </div>
+                <div>$${(item.price * item.quantity).toFixed(2)}</div>
+            </div>
+        `;
+    });
+    
+    orderItemsContainer.innerHTML = html;
+    updateTotals();
+}
+
+function updateTotals() {
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById('total').textContent = `$${subtotal.toFixed(2)}`;
+}
+
+async function placeOrder() {
+    const form = document.getElementById('checkoutForm');
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    const address = document.getElementById('address').value;
+    const city = document.getElementById('city').value;
+    const state = document.getElementById('state').value;
+    const zip = document.getElementById('zip').value;
+    const country = document.getElementById('country').value;
+    
+    const fullAddress = `${address}, ${city}, ${state} ${zip}, ${country}`;
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    try {
+        const response = await fetch('{{ url_for("checkout") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                phone: phone,
+                address: fullAddress,
+                total: total,
+                items: cart
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('orderNumber').textContent = data.order_number;
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+            
+            // Clear cart from database
+            await fetch('/api/cart', {
+                method: 'DELETE'
+            });
+            
+            // Clear cart from localStorage
+            localStorage.removeItem('cart');
+            cart = [];
+            updateCartCount();
+        } else {
+            alert('Error placing order. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error placing order. Please try again.');
+    }
+}
+
+function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById('cart-count').textContent = count;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadOrderSummary();
+});
+</script>
+{% endblock %}

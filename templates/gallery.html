@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Gallery - Artist Portfolio{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <h1 class="h2 fw-bold">Exhibitions</h1>
+    </div>
+
+    {% if exhibitions %}
+    <div class="row">
+        {% for exhibition in exhibitions %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                {% if exhibition.image_url %}
+                <img src="{{ exhibition.image_url }}" class="card-img-top" alt="{{ exhibition.title }}" 
+                     style="height: 220px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                    <i class="fas fa-museum fa-2x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ exhibition.title }}</h5>
+                    {% if exhibition.venue %}
+                    <p class="text-muted small mb-2">{{ exhibition.venue }}</p>
+                    {% endif %}
+                    {% if exhibition.date %}
+                    <p class="text-muted small mb-3">{{ exhibition.date }}</p>
+                    {% endif %}
+                    {% if exhibition.description %}
+                    <p class="card-text">{{ exhibition.description[:120] }}{% if exhibition.description|length > 120 %}...{% endif %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-museum fa-3x text-muted mb-3"></i>
+        <p class="text-muted">No exhibitions available</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

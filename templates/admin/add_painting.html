@@ -1,0 +1,161 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add Painting - Admin{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_paintings') }}">Paintings</a></li>
+        <li class="breadcrumb-item active">Add New</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <h1>Add Painting</h1>
+    <p>Create a new artwork entry</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="section-card">
+            <div class="section-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            {{ form.title.label(class="form-label fw-bold") }}
+                            {{ form.title(class="form-control form-control-lg", placeholder="e.g., Sunset Over Mountains") }}
+                            {% for error in form.title.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.year.label(class="form-label fw-bold") }}
+                            {{ form.year(class="form-control", placeholder="e.g., 2024") }}
+                            {% for error in form.year.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control", rows="4", placeholder="Describe your artwork, inspiration, and techniques used...") }}
+                        {% for error in form.description.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.category.label(class="form-label fw-bold") }}
+                            {{ form.category(class="form-select") }}
+                            {% for error in form.category.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.price.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.price(class="form-control", placeholder="0.00") }}
+                            </div>
+                            {% for error in form.price.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.size.label(class="form-label fw-bold") }}
+                            {{ form.size(class="form-control", placeholder="e.g., 24x36 inches") }}
+                            {% for error in form.size.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.medium.label(class="form-label fw-bold") }}
+                            {{ form.medium(class="form-control", placeholder="e.g., Oil on Canvas") }}
+                            {% for error in form.medium.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.image.label(class="form-label fw-bold") }}
+                        {{ form.image(class="form-control") }}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Accepted formats: JPG, PNG, JPEG. Max size: 16MB
+                        </div>
+                        {% for error in form.image.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        {{ form.featured.label(class="form-label fw-bold") }}
+                        {{ form.featured(class="form-select") }}
+                        <div class="form-text">
+                            <i class="fas fa-star me-1"></i>
+                            Featured paintings appear on the homepage
+                        </div>
+                        {% for error in form.featured.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Painting
+                        </button>
+                        <a href="{{ url_for('admin_paintings') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="section-card bg-light">
+            <div class="section-header bg-transparent">
+                <h5><i class="fas fa-lightbulb me-2"></i>Tips</h5>
+            </div>
+            <div class="section-body">
+                <ul class="small mb-0">
+                    <li class="mb-2">Use high-quality images for best presentation</li>
+                    <li class="mb-2">Write detailed descriptions to engage viewers</li>
+                    <li class="mb-2">Choose the most appropriate category</li>
+                    <li class="mb-2">Set competitive pricing based on size and medium</li>
+                    <li class="mb-2">Feature your best work on the homepage</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="section-card mt-3">
+            <div class="section-header">
+                <h5><i class="fas fa-palette me-2"></i>Categories</h5>
+            </div>
+            <div class="section-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-info">Abstract</span>
+                    <span class="badge bg-info">Landscape</span>
+                    <span class="badge bg-info">Portrait</span>
+                    <span class="badge bg-info">Drawings</span>
+                    <span class="badge bg-info">Semi-abstract</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

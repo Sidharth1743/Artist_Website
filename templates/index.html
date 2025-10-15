@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Artist Portfolio{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-creative py-5">
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    <div class="container py-5" style="position: relative; z-index: 1;">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-3 gradient-text">Contemporary Art Collection</h1>
+                <p class="lead text-muted mb-4">Discover unique pieces that transform spaces</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('paintings') }}" class="btn btn-primary btn-lg">Explore Gallery</a>
+                    <a href="{{ url_for('about') }}" class="btn btn-outline-dark btn-lg">About Artist</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div style="position: relative;">
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop" 
+                         alt="Featured Artwork" class="img-fluid rounded" 
+                         style="box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+                    <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: #1a1a1a; opacity: 0.05; border-radius: 50%; z-index: -1;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Paintings Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="h2 fw-bold gradient-text mb-2">Featured Artworks</h2>
+            <div style="width: 60px; height: 3px; background: #1a1a1a; margin: 0 auto;"></div>
+        </div>
+        
+        <div class="row">
+            {% for painting in paintings %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card painting-card h-100">
+                    <img src="{{ painting.image_url or 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop' }}" 
+                         class="card-img-top" alt="{{ painting.title }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">{{ painting.title }}</h5>
+                            <button class="btn btn-link p-0 wishlist-btn" onclick="toggleWishlist({{ painting.id }}, '{{ painting.title|replace("'", "\\'") }}')" title="Add to wishlist">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <p class="text-muted small mb-3">{{ painting.category }}</p>
+                        <div class="mb-3">
+                            <span class="fw-bold">${{ "%.2f"|format(painting.price) }}</span>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-sm" onclick="addToCart({{ painting.id }}, '{{ painting.title|replace("'", "\\'") }}', {{ painting.price }}, '{{ painting.image_url|replace("'", "\\'") if painting.image_url else '' }}')">
+                                <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                            </button>
+                            <a href="{{ url_for('painting_detail', id=painting.id) }}" class="btn btn-outline-dark btn-sm">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('paintings') }}" class="btn btn-outline-dark">View All</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

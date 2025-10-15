@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}About - Artist Portfolio{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="mb-5">
+                <h1 class="h2 fw-bold mb-3">About the Artist</h1>
+                <p class="lead">Contemporary artist specializing in abstract and landscape paintings.</p>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-md-6 mb-4">
+                    <h3 class="h5 fw-bold mb-3">Background</h3>
+                    <p>With over a decade of experience, I create contemporary artworks that explore the relationship between color, form, and emotion.</p>
+                    <p>My work has been featured in galleries across the country and is held in private collections worldwide.</p>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h3 class="h5 fw-bold mb-3">Approach</h3>
+                    <p>Each piece begins with an emotional response to a moment or place. Through layers of paint and careful composition, I transform these experiences into visual narratives.</p>
+                    <p>I work primarily with oil and acrylic on canvas, focusing on texture and color relationships.</p>
+                </div>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">Education</h5>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><strong>MFA Fine Arts</strong><br><small class="text-muted">School of Visual Arts, 2018</small></li>
+                                <li><strong>BFA Painting</strong><br><small class="text-muted">Rhode Island School of Design, 2016</small></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">Recognition</h5>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">Contemporary Artist of the Year, 2024</li>
+                                <li class="mb-2">Best Abstract Work, Art Fair International, 2023</li>
+                                <li>Emerging Artist Award, 2022</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-light mb-5">
+                <div class="card-body p-4">
+                    <blockquote class="mb-0">
+                        <p class="mb-3">"Art is not what you see, but what you make others see. My work invites viewers into a dialogue between the conscious and subconscious."</p>
+                        <footer class="text-muted small">— Artist Statement</footer>
+                    </blockquote>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <h3 class="h5 fw-bold mb-3">Contact</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <p class="mb-1"><strong>Location</strong></p>
+                        <p class="text-muted small">New York City, NY</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <p class="mb-1"><strong>Email</strong></p>
+                        <p class="text-muted small">contact@artistportfolio.com</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <p class="mb-1"><strong>Phone</strong></p>
+                        <p class="text-muted small">+1 (555) 123-4567</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <a href="{{ url_for('paintings') }}" class="btn btn-primary me-2">View Paintings</a>
+                <a href="{{ url_for('contact') }}" class="btn btn-outline-dark">Get in Touch</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

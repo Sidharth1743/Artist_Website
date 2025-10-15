@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Wishlist - Artist Portfolio{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <h1 class="h2 fw-bold">My Wishlist</h1>
+        <p class="text-muted">Your favorite paintings</p>
+    </div>
+
+    <div id="wishlistItems">
+        <div class="text-center py-5">
+            <div class="spinner-border" role="status"></div>
+            <p class="mt-2">Loading...</p>
+        </div>
+    </div>
+    
+    <div id="emptyWishlist" class="card text-center py-5" style="display: none;">
+        <div class="card-body">
+            <i class="far fa-heart fa-3x text-muted mb-3"></i>
+            <h4>Your wishlist is empty</h4>
+            <p class="text-muted">Start adding paintings you love</p>
+            <a href="{{ url_for('paintings') }}" class="btn btn-primary mt-3">Browse Paintings</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Use the global wishlist variable from base.html
+
+async function loadWishlist() {
+    const wishlistContainer = document.getElementById('wishlistItems');
+    const emptyWishlist = document.getElementById('emptyWishlist');
+    
+    console.log('Loading wishlist:', wishlist);
+    
+    if (wishlist.length === 0) {
+        wishlistContainer.style.display = 'none';
+        emptyWishlist.style.display = 'block';
+        return;
+    }
+    
+    wishlistContainer.style.display = 'block';
+    emptyWishlist.style.display = 'none';
+    
+    try {
+        // Fetch all paintings data
+        const paintingsData = await Promise.all(
+            wishlist.map(id => 
+                fetch('/api/paintings/' + id)
+                    .then(res => {
+                        if (!res.ok) throw new Error('Not found');
+                        return res.json();
+                    })
+                    .catch(err => {
+                        console.error('Failed to fetch painting:', id, err);
+                        return null;
+                    })
+            )
+        );
+        
+        // Filter out any failed requests
+        const validPaintings = paintingsData.filter(p => p !== null);
+        
+        console.log('Valid paintings:', validPaintings);
+        
+        // Update wishlist to remove invalid IDs
+        wishlist = validPaintings.map(p => p.id);
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        
+        if (validPaintings.length === 0) {
+            wishlistContainer.style.display = 'none';
+            emptyWishlist.style.display = 'block';
+            return;
+        }
+        
+        // Build HTML
+        let html = '<div class="row">';
+        validPaintings.forEach(painting => {
+            const imageHtml = painting.image_url ? 
+                '<img src="' + painting.image_url + '" class="card-img-top" alt="' + painting.title + '" style="height: 280px; object-fit: cover;">' :
+                '<div class="bg-light d-flex align-items-center justify-content-center" style="height: 280px;"><i class="fas fa-image fa-2x text-muted"></i></div>';
+            
+            const availableBadge = painting.available ? 
+                '<span class="badge bg-success">Available</span>' :
+                '<span class="badge bg-secondary">Sold</span>';
+            
+            const safeTitle = painting.title.replace(/'/g, "\\'");
+            const safeImageUrl = (painting.image_url || '').replace(/'/g, "\\'");
+            
+            const addToCartBtn = painting.available ?
+                '<button onclick="addToCartFromWishlist(' + painting.id + ', \'' + safeTitle + '\', ' + painting.price + ', \'' + safeImageUrl + '\')" class="btn btn-primary btn-sm"><i class="fas fa-cart-plus me-1"></i>Add to Cart</button>' :
+                '<button class="btn btn-secondary btn-sm" disabled>Sold Out</button>';
+            
+            html += '<div class="col-md-6 col-lg-4 mb-4">';
+            html += '<div class="card h-100">';
+            html += imageHtml;
+            html += '<div class="card-body">';
+            html += '<div class="d-flex justify-content-between align-items-start mb-2">';
+            html += '<h5 class="card-title fw-bold mb-0">' + painting.title + '</h5>';
+            html += '<button class="btn btn-link p-0 wishlist-btn" onclick="removeFromWishlist(' + painting.id + ')" title="Remove from wishlist">';
+            html += '<i class="fas fa-heart text-danger"></i>';
+            html += '</button>';
+            html += '</div>';
+            html += '<p class="text-muted small mb-3">' + painting.category + '</p>';
+            html += '<div class="d-flex justify-content-between align-items-center mb-3">';
+            html += '<span class="fw-bold">$' + painting.price.toFixed(2) + '</span>';
+            html += availableBadge;
+            html += '</div>';
+            html += '<div class="d-grid gap-2">';
+            html += '<a href="/painting/' + painting.id + '" class="btn btn-outline-dark btn-sm">View Details</a>';
+            html += addToCartBtn;
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+        
+        wishlistContainer.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading wishlist:', error);
+        wishlistContainer.innerHTML = '<div class="alert alert-danger">Error loading wishlist. Please try again.</div>';
+    }
+}
+
+function removeFromWishlist(paintingId) {
+    wishlist = wishlist.filter(id => id !== paintingId);
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    if (typeof updateWishlistCount === 'function') {
+        updateWishlistCount();
+    }
+    showToast('Removed from wishlist');
+    loadWishlist();
+}
+
+function addToCartFromWishlist(paintingId, title, price, imageUrl) {
+    if (typeof addToCart === 'function') {
+        addToCart(paintingId, title, price, imageUrl);
+    }
+    showToast('Added to cart');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadWishlist();
+    if (typeof updateWishlistCount === 'function') {
+        updateWishlistCount();
+    }
+});
+</script>
+{% endblock %}
