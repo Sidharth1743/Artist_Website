@@ -617,6 +617,13 @@ def admin_contacts():
     contacts = Contact.query.order_by(Contact.created_at.desc()).all()
     return render_template('admin/contacts.html', contacts=contacts)
 
+@app.route('/login')
+def user_login():
+    return render_template('user_login.html')
+
+from google_auth import google_auth
+app.register_blueprint(google_auth)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

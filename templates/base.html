@@ -45,6 +45,24 @@
             color: #1a1a1a !important;
         }
         
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
         .card {
             border: 1px solid #e5e5e5;
             border-radius: 8px;
@@ -417,6 +435,23 @@
                             <span class="badge bg-dark" id="cart-count">0</span>
                         </a>
                     </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
+                            <span class="ms-2">{{ current_user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('google_auth.user_logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user_login') }}">
+                            <i class="fas fa-user"></i> Login
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
