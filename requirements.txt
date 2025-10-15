@@ -18,3 +18,6 @@ psycopg2-binary
 python-dotenv
 Werkzeug
 WTForms
+Flask-Login
+oauthlib
+requests
