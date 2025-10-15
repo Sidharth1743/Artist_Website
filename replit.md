@@ -84,10 +84,12 @@ To enable Google Sign-In:
     - Separate admin and user authentication systems
   - **Production-Ready Features**:
     - Proper error handling and flash messages
-    - Secure session management
+    - Secure session management with CSRF protection
+    - OAuth state parameter validation to prevent CSRF attacks
     - Environment variable configuration for all secrets
     - Database schema with User table
     - Improved navigation with user state awareness
+    - Security-hardened Google OAuth implementation
   
 - 2025-10-15: Initial setup for Replit environment
   - Configured Flask app to run on 0.0.0.0:5000

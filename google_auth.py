@@ -39,10 +39,17 @@ def login():
     google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
+    # Generate and store state parameter for CSRF protection
+    import secrets
+    state = secrets.token_urlsafe(32)
+    from flask import session as flask_session
+    flask_session['oauth_state'] = state
+
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=request.base_url.replace("http://", "https://") + "/callback",
         scope=["openid", "email", "profile"],
+        state=state,
     )
     return redirect(request_uri)
 
@@ -51,6 +58,15 @@ def login():
 def callback():
     if not GOOGLE_CLIENT_ID:
         flash('Google OAuth is not configured. Please contact the administrator.', 'error')
+        return redirect(url_for('user_login'))
+    
+    # Verify state parameter for CSRF protection
+    from flask import session as flask_session
+    state = request.args.get("state")
+    stored_state = flask_session.pop('oauth_state', None)
+    
+    if not state or state != stored_state:
+        flash('Invalid state parameter. Please try logging in again.', 'error')
         return redirect(url_for('user_login'))
     
     code = request.args.get("code")
