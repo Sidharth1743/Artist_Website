@@ -50,9 +50,18 @@ The application uses Replit's built-in PostgreSQL database with the following ta
 - Image upload functionality
 
 ## Environment Variables
-- **DATABASE_URL** - PostgreSQL connection string (auto-configured)
+- **DATABASE_URL** - PostgreSQL connection string (auto-configured by Replit)
 - **SECRET_KEY** - Flask secret key for session security
+- **GOOGLE_OAUTH_CLIENT_ID** - Google OAuth client ID for user authentication
+- **GOOGLE_OAUTH_CLIENT_SECRET** - Google OAuth client secret
 - **PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE** - Database credentials (auto-configured)
+
+## Google OAuth Setup
+To enable Google Sign-In:
+1. Go to https://console.cloud.google.com/apis/credentials
+2. Create or select an OAuth 2.0 Client ID
+3. Add authorized redirect URI: `https://[your-replit-domain]/google_login/callback`
+4. Copy Client ID and Client Secret to Replit Secrets
 
 ## Default Admin Credentials
 - **Username**: admin
@@ -60,10 +69,30 @@ The application uses Replit's built-in PostgreSQL database with the following ta
 - ⚠️ **Important**: Change these credentials immediately after first login
 
 ## Recent Changes
+- 2025-10-15: Major UI/UX Improvements and Google Authentication
+  - **Visual Design Overhaul**: Completely redesigned CSS with modern, professional styling
+    - New color scheme with better contrast and readability
+    - Enhanced buttons with hover effects and smooth transitions
+    - Improved form controls with better focus states
+    - Responsive dropdown menus with custom styling
+    - Modern card layouts with shadows and hover animations
+  - **Google OAuth Integration**: Added Google Sign-In for users
+    - Implemented Flask-Login for session management
+    - Created User model in database for authenticated users
+    - Added user login/registration with Google OAuth 2.0
+    - User menu in navigation with avatar and logout functionality
+    - Separate admin and user authentication systems
+  - **Production-Ready Features**:
+    - Proper error handling and flash messages
+    - Secure session management
+    - Environment variable configuration for all secrets
+    - Database schema with User table
+    - Improved navigation with user state awareness
+  
 - 2025-10-15: Initial setup for Replit environment
   - Configured Flask app to run on 0.0.0.0:5000
   - Integrated with Replit PostgreSQL database
-  - Installed all Python dependencies
+  - Installed all Python dependencies (Flask, SQLAlchemy, Flask-Login, etc.)
   - Initialized database with sample data
   - Created uploads directory for image storage
 
