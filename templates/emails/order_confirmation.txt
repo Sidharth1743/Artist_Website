@@ -1,0 +1,29 @@
+ORDER CONFIRMATION
+
+Thank you for your order!
+
+Hi {{ order.customer_name }},
+
+We've received your order and will process it shortly.
+
+ORDER DETAILS
+Order Number: {{ order.order_number }}
+Date: {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+
+ITEMS:
+{% for item in order.order_items %}
+- {{ item.painting.title }}
+  Quantity: {{ item.quantity }} × ${{ "%.2f"|format(item.price) }} = ${{ "%.2f"|format(item.quantity * item.price) }}
+{% endfor %}
+
+TOTAL: ${{ "%.2f"|format(order.total_amount) }}
+
+SHIPPING ADDRESS:
+{{ order.shipping_address }}
+
+We'll send you another email when your order ships.
+
+If you have any questions, please don't hesitate to contact us.
+
+Artist Portfolio
+Thank you for your purchase!

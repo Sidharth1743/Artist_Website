@@ -23,8 +23,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# Email configuration
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', os.getenv('MAIL_USERNAME'))
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+# Initialize email service
+from email_service import init_mail
+init_mail(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -82,6 +94,7 @@ class Exhibition(db.Model):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_number = db.Column(db.String(100), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     customer_name = db.Column(db.String(200), nullable=False)
     customer_email = db.Column(db.String(200), nullable=False)
     customer_phone = db.Column(db.String(50))
@@ -125,7 +138,8 @@ class Admin(db.Model):
 
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    session_id = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    session_id = db.Column(db.String(100), nullable=True)
     painting_id = db.Column(db.Integer, db.ForeignKey('painting.id'), nullable=False)
     quantity = db.Column(db.Integer, default=1)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -134,7 +148,8 @@ class Cart(db.Model):
 
 class Wishlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    session_id = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    session_id = db.Column(db.String(100), nullable=True)
     painting_id = db.Column(db.Integer, db.ForeignKey('painting.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -250,6 +265,12 @@ def contact():
         )
         db.session.add(contact)
         db.session.commit()
+        
+        # Send email notifications
+        from email_service import send_contact_notification, send_contact_confirmation
+        send_contact_notification(contact)
+        send_contact_confirmation(contact)
+        
         flash('Thank you for your message! We will get back to you soon.', 'success')
         return redirect(url_for('contact'))
     return render_template('contact.html', form=form)
@@ -267,15 +288,23 @@ def api_painting(id):
 
 @app.route('/api/cart', methods=['GET', 'POST', 'DELETE'])
 def api_cart():
-    # Get or create session ID
-    if 'session_id' not in session:
-        session['session_id'] = str(uuid.uuid4())
-    
-    session_id = session['session_id']
+    # Determine identifier: user_id if logged in, otherwise session_id
+    if current_user.is_authenticated:
+        user_id = current_user.id
+        session_id = None
+    else:
+        user_id = None
+        if 'session_id' not in session:
+            session['session_id'] = str(uuid.uuid4())
+        session_id = session['session_id']
     
     if request.method == 'GET':
         # Get cart items
-        cart_items = Cart.query.filter_by(session_id=session_id).all()
+        if user_id:
+            cart_items = Cart.query.filter_by(user_id=user_id).all()
+        else:
+            cart_items = Cart.query.filter_by(session_id=session_id).all()
+        
         items = []
         for item in cart_items:
             if item.painting:
@@ -297,12 +326,15 @@ def api_cart():
         painting = Painting.query.get_or_404(painting_id)
         
         # Check if already in cart
-        cart_item = Cart.query.filter_by(session_id=session_id, painting_id=painting_id).first()
+        if user_id:
+            cart_item = Cart.query.filter_by(user_id=user_id, painting_id=painting_id).first()
+        else:
+            cart_item = Cart.query.filter_by(session_id=session_id, painting_id=painting_id).first()
         
         if cart_item:
             cart_item.quantity += quantity
         else:
-            cart_item = Cart(session_id=session_id, painting_id=painting_id, quantity=quantity)
+            cart_item = Cart(user_id=user_id, session_id=session_id, painting_id=painting_id, quantity=quantity)
             db.session.add(cart_item)
         
         db.session.commit()
@@ -317,23 +349,39 @@ def api_cart():
         # Remove from cart
         painting_id = request.args.get('painting_id', type=int)
         if painting_id:
-            Cart.query.filter_by(session_id=session_id, painting_id=painting_id).delete()
+            if user_id:
+                Cart.query.filter_by(user_id=user_id, painting_id=painting_id).delete()
+            else:
+                Cart.query.filter_by(session_id=session_id, painting_id=painting_id).delete()
         else:
             # Clear entire cart
-            Cart.query.filter_by(session_id=session_id).delete()
+            if user_id:
+                Cart.query.filter_by(user_id=user_id).delete()
+            else:
+                Cart.query.filter_by(session_id=session_id).delete()
         db.session.commit()
         return jsonify({'success': True})
 
 @app.route('/api/cart/update', methods=['POST'])
 def update_cart():
-    if 'session_id' not in session:
-        return jsonify({'success': False, 'message': 'No session'})
+    # Determine identifier
+    if current_user.is_authenticated:
+        user_id = current_user.id
+        session_id = None
+    else:
+        if 'session_id' not in session:
+            return jsonify({'success': False, 'message': 'No session'})
+        user_id = None
+        session_id = session['session_id']
     
     data = request.get_json()
     painting_id = data.get('painting_id')
     quantity = data.get('quantity', 1)
     
-    cart_item = Cart.query.filter_by(session_id=session['session_id'], painting_id=painting_id).first()
+    if user_id:
+        cart_item = Cart.query.filter_by(user_id=user_id, painting_id=painting_id).first()
+    else:
+        cart_item = Cart.query.filter_by(session_id=session_id, painting_id=painting_id).first()
     
     if cart_item:
         if quantity > 0:
@@ -347,15 +395,23 @@ def update_cart():
 
 @app.route('/api/wishlist', methods=['GET', 'POST', 'DELETE'])
 def api_wishlist():
-    # Get or create session ID
-    if 'session_id' not in session:
-        session['session_id'] = str(uuid.uuid4())
-    
-    session_id = session['session_id']
+    # Determine identifier: user_id if logged in, otherwise session_id
+    if current_user.is_authenticated:
+        user_id = current_user.id
+        session_id = None
+    else:
+        user_id = None
+        if 'session_id' not in session:
+            session['session_id'] = str(uuid.uuid4())
+        session_id = session['session_id']
     
     if request.method == 'GET':
         # Get wishlist items
-        wishlist_items = Wishlist.query.filter_by(session_id=session_id).all()
+        if user_id:
+            wishlist_items = Wishlist.query.filter_by(user_id=user_id).all()
+        else:
+            wishlist_items = Wishlist.query.filter_by(session_id=session_id).all()
+        
         items = [item.painting_id for item in wishlist_items if item.painting]
         return jsonify(items)
     
@@ -367,10 +423,13 @@ def api_wishlist():
         painting = Painting.query.get_or_404(painting_id)
         
         # Check if already in wishlist
-        wishlist_item = Wishlist.query.filter_by(session_id=session_id, painting_id=painting_id).first()
+        if user_id:
+            wishlist_item = Wishlist.query.filter_by(user_id=user_id, painting_id=painting_id).first()
+        else:
+            wishlist_item = Wishlist.query.filter_by(session_id=session_id, painting_id=painting_id).first()
         
         if not wishlist_item:
-            wishlist_item = Wishlist(session_id=session_id, painting_id=painting_id)
+            wishlist_item = Wishlist(user_id=user_id, session_id=session_id, painting_id=painting_id)
             db.session.add(wishlist_item)
             db.session.commit()
         
@@ -383,7 +442,10 @@ def api_wishlist():
         # Remove from wishlist
         painting_id = request.args.get('painting_id', type=int)
         if painting_id:
-            Wishlist.query.filter_by(session_id=session_id, painting_id=painting_id).delete()
+            if user_id:
+                Wishlist.query.filter_by(user_id=user_id, painting_id=painting_id).delete()
+            else:
+                Wishlist.query.filter_by(session_id=session_id, painting_id=painting_id).delete()
             db.session.commit()
         return jsonify({'success': True})
 
@@ -405,6 +467,7 @@ def checkout():
         order_number = f"ORD-{uuid.uuid4().hex[:8].upper()}"
         order = Order(
             order_number=order_number,
+            user_id=current_user.id if current_user.is_authenticated else None,
             customer_name=data.get('name'),
             customer_email=data.get('email'),
             customer_phone=data.get('phone'),
@@ -426,6 +489,11 @@ def checkout():
             db.session.add(order_item)
         
         db.session.commit()
+        
+        # Send email notifications
+        from email_service import send_order_confirmation, send_order_notification_to_admin
+        send_order_confirmation(order, order.customer_email)
+        send_order_notification_to_admin(order)
         
         return jsonify({
             'success': True,
@@ -620,6 +688,18 @@ def admin_contacts():
 @app.route('/login')
 def user_login():
     return render_template('user_login.html')
+
+@app.route('/my-orders')
+@login_required
+def my_orders():
+    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
+    return render_template('my_orders.html', orders=orders)
+
+@app.route('/order/<order_number>')
+@login_required
+def order_detail(order_number):
+    order = Order.query.filter_by(order_number=order_number, user_id=current_user.id).first_or_404()
+    return render_template('order_detail.html', order=order)
 
 from google_auth import google_auth
 app.register_blueprint(google_auth)

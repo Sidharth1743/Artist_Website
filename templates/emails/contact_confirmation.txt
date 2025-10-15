@@ -1,0 +1,16 @@
+THANK YOU FOR CONTACTING US
+
+Hi {{ contact.name }},
+
+Thank you for reaching out to us. We've received your message and will get back to you as soon as possible.
+
+YOUR MESSAGE:
+{{ contact.message }}
+
+We typically respond within 24-48 hours during business days.
+
+Best regards,
+Artist Portfolio Team
+
+---
+This is an automated confirmation email.

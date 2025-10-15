@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✉️ Thank You for Contacting Us</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{ contact.name }},</p>
+            
+            <p>Thank you for reaching out to us. We've received your message and will get back to you as soon as possible.</p>
+            
+            <p><strong>Your message:</strong></p>
+            <p style="background: white; padding: 15px; border-radius: 5px;">{{ contact.message }}</p>
+            
+            <p>We typically respond within 24-48 hours during business days.</p>
+            
+            <p>Best regards,<br>
+            Artist Portfolio Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>Artist Portfolio<br>
+            This is an automated confirmation email.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -47,103 +47,73 @@
     </div>
 </div>
 
-<div class="row">
-    <!-- Recent Orders -->
-    <div class="col-lg-8 mb-4">
-        <div class="section-card">
-            <div class="section-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5>Recent Orders</h5>
-                    <a href="{{ url_for('admin_orders') }}" class="btn btn-sm btn-outline-dark">
-                        View All
-                    </a>
-                </div>
-            </div>
-            <div class="section-body p-0">
-                {% if recent_orders %}
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in recent_orders %}
-                            <tr>
-                                <td>
-                                    <strong>#{{ order.order_number[:8] }}</strong>
-                                </td>
-                                <td>
-                                    <div>
-                                        <strong>{{ order.customer_name }}</strong><br>
-                                        <small class="text-muted">{{ order.customer_email }}</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <strong class="text-success">${{ "%.2f"|format(order.total_amount) }}</strong>
-                                </td>
-                                <td>
-                                    <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' if order.status == 'pending' else 'info' }}">
-                                        {{ order.status.title() }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <small class="text-muted">{{ order.created_at.strftime('%Y-%m-%d') }}</small>
-                                </td>
-                                <td>
-                                    <div class="table-actions">
-                                        <button class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="btn btn-outline-success btn-sm">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    </div>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <p class="text-muted mb-0">No orders yet</p>
-                </div>
-                {% endif %}
-            </div>
+<!-- Recent Orders -->
+<div class="section-card">
+    <div class="section-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5>Recent Orders</h5>
+            <a href="{{ url_for('admin_orders') }}" class="btn btn-sm btn-outline-dark">
+                View All
+            </a>
         </div>
     </div>
-    
-    <!-- Quick Actions -->
-    <div class="col-lg-4 mb-4">
-        <div class="section-card">
-            <div class="section-header">
-                <h5>Quick Actions</h5>
-            </div>
-            <div class="section-body">
-                <div class="d-grid gap-2">
-                    <a href="{{ url_for('admin_add_painting') }}" class="btn btn-primary">
-                        Add Painting
-                    </a>
-                    <a href="{{ url_for('admin_add_exhibition') }}" class="btn btn-outline-dark">
-                        Add Exhibition
-                    </a>
-                    <a href="{{ url_for('admin_contacts') }}" class="btn btn-outline-dark">
-                        View Messages
-                    </a>
-                    <a href="{{ url_for('home') }}" target="_blank" class="btn btn-outline-dark">
-                        View Website
-                    </a>
-                </div>
-            </div>
+    <div class="section-body p-0">
+        {% if recent_orders %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>
+                            <strong>#{{ order.order_number[:8] }}</strong>
+                        </td>
+                        <td>
+                            <div>
+                                <strong>{{ order.customer_name }}</strong><br>
+                                <small class="text-muted">{{ order.customer_email }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <strong class="text-success">${{ "%.2f"|format(order.total_amount) }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' if order.status == 'pending' else 'info' }}">
+                                {{ order.status.title() }}
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ order.created_at.strftime('%Y-%m-%d') }}</small>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted mb-0">No orders yet</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

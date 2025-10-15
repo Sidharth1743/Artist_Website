@@ -1,0 +1,26 @@
+NEW ORDER RECEIVED
+
+Action Required: A new order has been placed and requires processing.
+
+ORDER INFORMATION
+Order Number: {{ order.order_number }}
+Date: {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+Status: {{ order.status }}
+
+CUSTOMER INFORMATION:
+Name: {{ order.customer_name }}
+Email: {{ order.customer_email }}
+Phone: {{ order.customer_phone or 'Not provided' }}
+
+ITEMS ORDERED:
+{% for item in order.order_items %}
+- {{ item.painting.title }} (ID: {{ item.painting.id }})
+  Quantity: {{ item.quantity }} × ${{ "%.2f"|format(item.price) }} = ${{ "%.2f"|format(item.quantity * item.price) }}
+{% endfor %}
+
+TOTAL: ${{ "%.2f"|format(order.total_amount) }}
+
+SHIPPING ADDRESS:
+{{ order.shipping_address }}
+
+View in Admin Panel: http://localhost:5000/admin/orders

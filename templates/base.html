@@ -442,7 +442,9 @@
                             <span class="ms-2">{{ current_user.username }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('google_auth.user_logout') }}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('my_orders') }}"><i class="fas fa-shopping-bag me-2"></i>My Orders</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('google_auth.user_logout') }}" onclick="clearUserData()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                         </ul>
                     </li>
                     {% else %}
@@ -616,22 +618,18 @@
                 const cartResponse = await fetch('/api/cart');
                 if (cartResponse.ok) {
                     const dbCart = await cartResponse.json();
-                    if (dbCart.length > 0) {
-                        // Use database as source of truth
-                        cart = dbCart;
-                        localStorage.setItem('cart', JSON.stringify(cart));
-                    }
+                    // Always use database as source of truth
+                    cart = dbCart;
+                    localStorage.setItem('cart', JSON.stringify(cart));
                 }
                 
                 // Load wishlist from database
                 const wishlistResponse = await fetch('/api/wishlist');
                 if (wishlistResponse.ok) {
                     const dbWishlist = await wishlistResponse.json();
-                    if (dbWishlist.length > 0) {
-                        // Use database as source of truth
-                        wishlist = dbWishlist;
-                        localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                    }
+                    // Always use database as source of truth
+                    wishlist = dbWishlist;
+                    localStorage.setItem('wishlist', JSON.stringify(wishlist));
                 }
                 
                 updateCartCount();
@@ -648,8 +646,34 @@
             }
         }
         
+        // Clear localStorage on user change
+        function clearUserData() {
+            localStorage.removeItem('cart');
+            localStorage.removeItem('wishlist');
+            cart = [];
+            wishlist = [];
+            updateCartCount();
+            if (typeof updateWishlistCount === 'function') {
+                updateWishlistCount();
+            }
+        }
+        
+        // Store current user ID to detect user changes
+        const currentUserId = '{{ current_user.id if current_user.is_authenticated else "guest" }}';
+        const storedUserId = localStorage.getItem('current_user_id');
+        
         // Initialize cart count on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if user has changed
+            if (storedUserId && storedUserId !== currentUserId) {
+                // User changed, clear old data
+                clearUserData();
+            }
+            
+            // Store current user ID
+            localStorage.setItem('current_user_id', currentUserId);
+            
+            // Always sync with database on page load to get current user's data
             syncWithDatabase();
         });
         

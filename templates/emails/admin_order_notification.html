@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .order-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .item { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .total { font-size: 1.2em; font-weight: bold; margin-top: 15px; }
+        .alert { background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 New Order Received</h1>
+        </div>
+        
+        <div class="content">
+            <div class="alert">
+                <strong>Action Required:</strong> A new order has been placed and requires processing.
+            </div>
+            
+            <div class="order-details">
+                <h3>Order Information</h3>
+                <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+                <p><strong>Date:</strong> {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                <p><strong>Status:</strong> {{ order.status }}</p>
+                
+                <h4>Customer Information:</h4>
+                <p>
+                    <strong>Name:</strong> {{ order.customer_name }}<br>
+                    <strong>Email:</strong> {{ order.customer_email }}<br>
+                    <strong>Phone:</strong> {{ order.customer_phone or 'Not provided' }}
+                </p>
+                
+                <h4>Items Ordered:</h4>
+                {% for item in order.order_items %}
+                <div class="item">
+                    <strong>{{ item.painting.title }}</strong> (ID: {{ item.painting.id }})<br>
+                    Quantity: {{ item.quantity }} × ${{ "%.2f"|format(item.price) }} = ${{ "%.2f"|format(item.quantity * item.price) }}
+                </div>
+                {% endfor %}
+                
+                <div class="total">
+                    Total: ${{ "%.2f"|format(order.total_amount) }}
+                </div>
+                
+                <h4>Shipping Address:</h4>
+                <p>{{ order.shipping_address }}</p>
+            </div>
+            
+            <p><a href="http://localhost:5000/admin/orders" style="background: #1a1a1a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View in Admin Panel</a></p>
+        </div>
+    </div>
+</body>
+</html>

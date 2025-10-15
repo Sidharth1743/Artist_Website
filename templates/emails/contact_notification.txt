@@ -1,0 +1,13 @@
+NEW CONTACT MESSAGE
+
+Contact Form Submission
+
+From: {{ contact.name }}
+Email: {{ contact.email }}
+Subject: {{ contact.subject or 'No subject' }}
+Date: {{ contact.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+
+MESSAGE:
+{{ contact.message }}
+
+View in Admin Panel: http://localhost:5000/admin/contacts

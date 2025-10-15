@@ -21,3 +21,4 @@ WTForms
 Flask-Login
 oauthlib
 requests
+Flask-Mail

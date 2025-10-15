@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .message-box { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #1a1a1a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 New Contact Message</h1>
+        </div>
+        
+        <div class="content">
+            <h3>Contact Form Submission</h3>
+            
+            <div class="message-box">
+                <p><strong>From:</strong> {{ contact.name }}</p>
+                <p><strong>Email:</strong> {{ contact.email }}</p>
+                <p><strong>Subject:</strong> {{ contact.subject or 'No subject' }}</p>
+                <p><strong>Date:</strong> {{ contact.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                
+                <h4>Message:</h4>
+                <p>{{ contact.message }}</p>
+            </div>
+            
+            <p><a href="http://localhost:5000/admin/contacts" style="background: #1a1a1a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View in Admin Panel</a></p>
+        </div>
+    </div>
+</body>
+</html>

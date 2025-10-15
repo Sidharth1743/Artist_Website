@@ -26,6 +26,7 @@ venv/
 ENV/
 env/
 .venv
+.env/
 
 # Flask
 instance/
@@ -57,3 +58,18 @@ static/uploads/*
 
 # Logs
 *.log
+__pycache__/
+# Environment variables
+.env
+.env.local
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+linkedin/
