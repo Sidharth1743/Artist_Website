@@ -8,3 +8,13 @@ Werkzeug
 email-validator
 Pillow
 python-dotenv
+email-validator
+Flask
+Flask-Migrate
+Flask-SQLAlchemy
+Flask-WTF
+Pillow
+psycopg2-binary
+python-dotenv
+Werkzeug
+WTForms
